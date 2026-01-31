@@ -1,0 +1,47 @@
+import React from "react";
+
+import Hero from "./components/Hero";
+import GridCarousel from "./components/GridCarousel";
+import FavSongs from "./components/FavSongs";
+import SuffelCard from "./components/SuffelCard";
+import MyDetails from "./components/MyDetails";
+import Contributions from "./components/Contributions";
+import XCards from "./components/XCards";
+
+const MainLandinPage = () => {
+  return (
+    <div className=" h-screen w-screen  ">
+      <section>
+        <Hero />
+      </section>
+
+      <section>
+        <GridCarousel />
+      </section>
+
+      <section>
+        <FavSongs />
+      </section>
+
+      <section>
+        <SuffelCard />
+      </section>
+
+      <section>
+        <MyDetails />
+      </section>
+
+      <section>
+        <Contributions />
+      </section>
+
+      <section>
+        <XCards />
+      </section>
+
+    </div>
+  );
+};
+
+export default MainLandinPage;
+
