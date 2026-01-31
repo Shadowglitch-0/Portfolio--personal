@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import type React from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type ContributionData = {
   date: string;
@@ -184,19 +184,28 @@ const calculateMonthHeaders = (targetYear: number) => {
 
 export function ContributionGraph({
   data = [],
-  year = new Date().getFullYear(),
+  year,
   className = "",
   showLegend = true,
   showTooltips = true,
 }: ContributionGraphProps) {
   const [hoveredDay, setHoveredDay] = useState<ContributionData | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [isMounted, setIsMounted] = useState(false);
+  const [resolvedYear, setResolvedYear] = useState(year || 2026);
   const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    setIsMounted(true);
+    if (!year) {
+      setResolvedYear(new Date().getFullYear());
+    }
+  }, [year]);
 
   // Generate all days for the year
   const yearData = useMemo(() => {
-    const startDate = new Date(year, JANUARY_MONTH, DAY_1);
-    const endDate = new Date(year, DECEMBER_MONTH, DAY_31);
+    const startDate = new Date(resolvedYear, JANUARY_MONTH, DAY_1);
+    const endDate = new Date(resolvedYear, DECEMBER_MONTH, DAY_31);
     const days: ContributionData[] = [];
 
     // Start from the Sunday of the first week that contains January 1st
@@ -212,7 +221,7 @@ export function ContributionGraph({
           firstSunday.getDate() + weekNum * DAYS_IN_WEEK + day,
         );
 
-        if (isDateInValidRange(currentDate, startDate, endDate, year)) {
+        if (isDateInValidRange(currentDate, startDate, endDate, resolvedYear)) {
           days.push(createDayData(currentDate, data));
         } else {
           // Add empty day for alignment
@@ -227,10 +236,10 @@ export function ContributionGraph({
     }
 
     return days;
-  }, [data, year]);
+  }, [data, resolvedYear]);
 
   // Calculate month headers with colspan
-  const monthHeaders = useMemo(() => calculateMonthHeaders(year), [year]);
+  const monthHeaders = useMemo(() => calculateMonthHeaders(resolvedYear), [resolvedYear]);
 
   const handleDayHover = (day: ContributionData, event: React.MouseEvent) => {
     if (showTooltips && day.date) {
@@ -266,11 +275,24 @@ export function ContributionGraph({
     return `${count} contributions`;
   };
 
+  // Render a placeholder on server to avoid hydration mismatch
+  if (!isMounted) {
+    return (
+      <div className={`contribution-graph ${className}`}>
+        <div className="overflow-x-auto">
+          <table className="border-separate border-spacing-1 text-xs">
+            <caption className="sr-only">Contribution Graph for {resolvedYear}</caption>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`contribution-graph ${className}`}>
       <div className="overflow-x-auto">
         <table className="border-separate border-spacing-1 text-xs">
-          <caption className="sr-only">Contribution Graph for {year}</caption>
+          <caption className="sr-only">Contribution Graph for {resolvedYear}</caption>
 
           {/* Month Headers */}
           <thead>
