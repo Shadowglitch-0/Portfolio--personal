@@ -27,9 +27,16 @@ const generateSampleData = (year: number): ContributionData[] => {
 };
 
 const Contributions = () => {
-    const [year, setYear] = useState(new Date().getFullYear());
+    const [year, setYear] = useState(2026);
   const [showLegend, setShowLegend] = useState(true);
   const [showTooltips, setShowTooltips] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+    setYear(new Date().getFullYear());
+  }, []);
+
   const sampleData = useMemo(() => generateSampleData(year), [year]);
   return (
      <div 

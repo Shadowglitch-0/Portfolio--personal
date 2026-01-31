@@ -34,9 +34,14 @@ const greetings: Greeting[] = [
 const DynamicText = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (!isAnimating) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isAnimating || !isMounted) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => {
@@ -53,7 +58,7 @@ const DynamicText = () => {
     }, 300);
 
     return () => clearInterval(interval);
-  }, [isAnimating]);
+  }, [isAnimating, isMounted]);
 
   // Animation variants for the text
   const textVariants = {
@@ -68,7 +73,7 @@ const DynamicText = () => {
       className="flex min-h-[100px] mt-10  items-center justify-center gap-1 p-4"
     >
       <div className="relative flex h-16 w-40 items-center justify-center overflow-visible">
-        {isAnimating ? (
+        {isMounted && isAnimating ? (
           <AnimatePresence mode="popLayout">
             <motion.div
               animate={textVariants.visible}
@@ -86,13 +91,21 @@ const DynamicText = () => {
               {greetings[currentIndex].text}
             </motion.div>
           </AnimatePresence>
-        ) : (
+        ) : isMounted ? (
           <div className="flex items-center gap-2 font-medium text-4xl text-gray-800 dark:text-gray-200">
             <div
               aria-hidden="true"
               className="h-2 w-2 rounded-full bg-black dark:bg-white"
             />
             {greetings[currentIndex].text}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 font-medium text-2xl text-gray-800 dark:text-gray-200">
+            <div
+              aria-hidden="true"
+              className="h-2 w-2 rounded-full bg-black dark:bg-white"
+            />
+            {greetings[0].text}
           </div>
         )}
       </div>
